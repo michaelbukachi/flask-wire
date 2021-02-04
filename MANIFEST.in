@@ -1,0 +1,2 @@
+graft flask_wire/static
+graft flask_wire/templates

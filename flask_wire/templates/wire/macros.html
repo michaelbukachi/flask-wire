@@ -1,0 +1,13 @@
+{% macro wire_frame(id, initial=None, extra_classes=None, on_events=None) %}
+  <div wire:frame="{{ id }}" {% if initial %}wire:init="{{ initial }}"{% endif %}
+       class="{% if extra_classes %}{{ extra_classes }}{% endif %}"
+       {% if on_events %}wire:on-event="{{ on_events|join(',') }}"{% endif %}></div>
+{% endmacro %}
+
+{% macro wire_trigger(target, source, text) %}
+  <a href="javascript:" wire:target="{{ target }}" wire:source="{{ source }}">{{ text }}</a>
+{% endmacro %}
+
+{% macro wire_mutation(events=None) %}
+  wire:mutate {% if events %}wire:event="{{ events|join(',') }}"{% endif %}
+{% endmacro %}

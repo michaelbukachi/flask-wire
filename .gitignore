@@ -1,0 +1,4 @@
+.idea
+venv
+node_modules
+wire.db

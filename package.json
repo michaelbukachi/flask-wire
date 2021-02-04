@@ -1,0 +1,16 @@
+{
+  "name": "flask-wire",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Michael Bukachi",
+  "license": "MIT",
+  "devDependencies": {
+    "browserify": "^17.0.0",
+    "esmify": "^2.1.1",
+    "tinyify": "^3.0.0"
+  },
+  "dependencies": {
+    "promise-polyfill": "^8.2.0",
+    "whatwg-fetch": "^3.5.0"
+  }
+}
