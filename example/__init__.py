@@ -1,3 +1,4 @@
+import time
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 
@@ -39,6 +40,11 @@ def create_app():
     @app.route('/sub_header')
     def sub_header():
         return '<h3>Sub Header</h3>'
+
+    @app.route('/sub_waiting_header')
+    def sub_sub_header():
+        time.sleep(2)
+        return '<h4>Waiting Header</h3>'
 
     @app.route('/another')
     def another_header():

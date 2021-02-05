@@ -2,16 +2,35 @@ import 'whatwg-fetch'
 import {fetch} from "whatwg-fetch";
 
 class WireFrame {
-  constructor(id, element, initial = null, events = null) {
+  constructor(id, element, initial = null) {
     this.id = id
-    this.element = element
     this.initial = initial
     this.source = null
-    this.events = events === null ? [] : events
+    this.element = null
+    this.errorBody = null
+    this.loader = null
+    this.body = null
+
+    this.init(element)
+  }
+
+  init(element) {
+    if (element.children.length) {
+      this.body = element.querySelector("[wire\\:body]")
+      this.errorBody = element.querySelector("[wire\\:error-body]")
+      this.loader = element.querySelector("[wire\\:loader]")
+    }
+
+    this.hideLoader()
+    this.hideError()
+
+    this.element = element
   }
 
   updateBody(body) {
-    this.element.innerHTML = body
+    if (this.body) {
+      this.body.innerHTML = body
+    }
   }
 
   updateSource(source, onSourceDataFetched = null) {
@@ -25,26 +44,68 @@ class WireFrame {
   }
 
   fetchDataFromSource(source, target, onDone = null) {
-    fetch(source).then((response) => {
-      return response.text()
-    }).then((body) => {
-      this.updateBody(body)
-      this.source = source
+    this.hideError()
+    this.showLoader()
 
-      if (onDone !== null) {
-        const element = this.stringToElement(body)
-        onDone(element)
-      }
-    }).catch(function (e) {
-      console.log(e)
+    fetch(source)
+      .then(this.checkStatus)
+      .then((response) => {
+        return response.text()
+      })
+      .then((body) => {
+        this.updateBody(body)
+        this.source = source
+
+        if (onDone !== null) {
+          const element = this.stringToElement(body)
+          onDone(element)
+        }
+      })
+      .catch((e) => {
+        console.log(e)
+        this.showError()
+      }).finally(() => {
+      this.hideLoader()
     })
   }
 
-  handleEvent(event) {
-    if (this.events.map(e => e.name).includes(event)) {
-      if (this.source !== null) {
-        this.updateSource(this.source)
-      }
+  checkStatus(response) {
+    if (response.status >= 200 && response.status < 400) {
+      return response
+    } else {
+      const error = new Error(response.statusText)
+      error.response = response
+      throw error
+    }
+  }
+
+  hideLoader() {
+    if (this.loader) {
+      this.loader.style.display = 'none'
+    }
+  }
+
+  showLoader() {
+    if (this.loader) {
+      this.loader.style.display = 'block'
+    }
+  }
+
+  hideError() {
+    if (this.errorBody) {
+      this.errorBody.style.display = 'none'
+    }
+  }
+
+  showError() {
+    if (this.errorBody) {
+      this.errorBody.style.display = 'block'
+    }
+  }
+
+  refresh() {
+    if (this.source !== null) {
+      this.updateSource(this.source)
     }
   }
 }
@@ -52,12 +113,30 @@ class WireFrame {
 class WireEvent {
   constructor(name) {
     this.name = name
+    this.listeners = {}
+  }
+
+  addListener(listener) {
+    if (!(listener.id in this.listeners)) {
+      this.listeners[listener.id] = listener
+    }
+  }
+
+  removeListener(listenerId) {
+    if (listenerId in this.listeners) {
+      delete this.listeners[listenerId]
+    }
+  }
+
+  fire() {
+    Object.keys(this.listeners).forEach(key => this.listeners[key].refresh())
   }
 }
 
 class WireManager {
   constructor() {
     this.frames = {}
+    this.events = {}
   }
 
   load() {
@@ -66,18 +145,34 @@ class WireManager {
     this.setupDocumentListeners()
   }
 
+  registerForEvent(eventName, listener) {
+    if (!(eventName in this.events)) {
+      this.events[eventName] = new WireEvent(eventName)
+    }
+
+    this.events[eventName].addListener(listener)
+  }
+
+  fireEvents(events) {
+    for (let event of events) {
+      if (event in this.events) {
+        this.events[event].fire()
+      }
+    }
+  }
+
   loadFrames(doc = document) {
     this.getAllWireFrames(doc).forEach(element => {
       const id = element.getAttribute('wire:frame')
       const initial = element.getAttribute('wire:init')
       const events = element.getAttribute('wire:on-event')
-      let eventsList = null
 
-      if (events !== null) {
-        eventsList = events.split(',').map(event => new WireEvent(event))
-      }
       if (!(id in this.frames)) {
-        this.frames[id] = new WireFrame(id, element, initial, eventsList)
+        this.frames[id] = new WireFrame(id, element, initial)
+
+        if (events !== null) {
+          events.split(',').forEach(event => this.registerForEvent(event, this.frames[id]))
+        }
         if (initial !== null) {
           this.frames[id].updateSource(initial, (doc) => {
             this.loadFrames(doc)
@@ -86,6 +181,8 @@ class WireManager {
         }
       }
     })
+
+    this.doCleanup()
   }
 
   prepareTriggers(doc = document) {
@@ -163,14 +260,6 @@ class WireManager {
     }
   }
 
-  fireEvents(events) {
-    for (let event of events) {
-      for (let frameId of Object.keys(this.frames)) {
-        this.frames[frameId].handleEvent(event)
-      }
-    }
-  }
-
   performMutation(url, data, method, eventsHandler = null) {
     fetch(url, {
       method: method,
@@ -181,6 +270,16 @@ class WireManager {
       }
     }).catch(function (e) {
       console.log(e)
+    })
+  }
+
+  doCleanup() {
+    const storedFrameIds = new Set(Object.keys(this.frames))
+    const presentFrameIds = new Set(this.getAllWireFrames().map(element => element.getAttribute('wire:frame')))
+    const expiredFrameIds = [...storedFrameIds].filter(id => !presentFrameIds.has(id))
+    expiredFrameIds.forEach(id => {
+      Object.values(this.events).forEach(event => event.removeListener(id)) // Remove frame from event
+      delete this.frames[id] // Remove frame
     })
   }
 

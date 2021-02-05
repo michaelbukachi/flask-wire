@@ -9,6 +9,7 @@
 <body>
 {{ wire_frame(id='test', initial=url_for('header')) }}
 {{ wire_frame(id='test2', initial=url_for('sub_header')) }}
+{{ wire_frame(id='test3', initial=url_for('sub_sub_header')) }}
 {{ wire_frame(id='messages_list', initial=url_for('messages_list'), on_events=['message-added']) }}
 {{ wire_trigger(target='test', source=url_for('another_header'), text='Change header') }}
 <div style="margin-top: 20px">
@@ -17,5 +18,6 @@
     <button type="submit">Add message</button>
   </form>
 </div>
+{{ wire_frame(id='test4', initial='/someurl') }}
 </body>
 </html>
