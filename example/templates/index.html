@@ -13,7 +13,7 @@
 {{ wire_frame(id='messages_list', initial=url_for('messages_list'), on_events=['message-added']) }}
 {{ wire_trigger(target='test', source=url_for('another_header'), text='Change header') }}
 <div style="margin-top: 20px">
-  <form method="post" action="{{ url_for('add_message') }}" {{ wire_mutation(['message-added']) }}>
+  <form method="post" action="{{ url_for('add_message') }}" {{ wire_mutation(events=['message-added']) }}>
     <input name="message" placeholder="Message">
     <button type="submit">Add message</button>
   </form>

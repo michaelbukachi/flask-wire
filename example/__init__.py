@@ -16,6 +16,7 @@ class Message(db.Model):
 class Config:
     SECRET_KEY = 'Some secret'
     SQLALCHEMY_DATABASE_URI = 'sqlite:///wire.db'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
 def create_app():

@@ -1,6 +1,59 @@
 import 'whatwg-fetch'
 import {fetch} from "whatwg-fetch";
 
+export class DomUtils {
+
+  static selectElementsWithAttribute(doc, attr) {
+    const regex = new RegExp(attr)
+    const elements = []
+    const children = doc.children
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i]
+      if (child.hasAttributes()) {
+        for (let j = 0; j < child.attributes.length; j++) {
+          if (regex.test(child.attributes[j].name)) {
+            elements.push(child)
+            break
+          }
+        }
+      }
+    }
+    return elements
+  }
+
+  static selectFirstElementWithAttribute(doc, attr) {
+    const elements = DomUtils.selectElementsWithAttribute(doc, attr)
+    return elements.length ? elements[0] : null
+  }
+
+  static stringToElement(string) {
+    const template = document.createElement('template')
+    template.innerHTML = string.trim()
+    return template.content.firstChild
+  }
+
+  static getAttributeNames(element) {
+    if (!element.hasAttributes()) {
+      return []
+    }
+    const attributeNames = []
+    for (let i = 0; i < element.attributes.length; i++) {
+      const attr = element.attributes[i]
+      attributeNames.push(attr.name)
+    }
+    return attributeNames
+  }
+
+  static getModifiers(attr) {
+    const tokens = attr.split('.')
+    if (tokens.length === 1) {
+      return []
+    } else {
+      return tokens.slice(1)
+    }
+  }
+}
+
 class WireFrame {
   constructor(id, element, initial = null) {
     this.id = id
@@ -9,6 +62,7 @@ class WireFrame {
     this.element = null
     this.errorBody = null
     this.loader = null
+    this.loaderDisplayType = 'block'
     this.body = null
 
     this.init(element)
@@ -16,11 +70,12 @@ class WireFrame {
 
   init(element) {
     if (element.children.length) {
-      this.body = element.querySelector("[wire\\:body]")
-      this.errorBody = element.querySelector("[wire\\:error-body]")
-      this.loader = element.querySelector("[wire\\:loader]")
+      this.body = DomUtils.selectFirstElementWithAttribute(element, 'wire:body')
+      this.errorBody = DomUtils.selectFirstElementWithAttribute(element, 'wire:error-body')
+      this.loader = DomUtils.selectFirstElementWithAttribute(element, 'wire:loader.*')
     }
 
+    this.prepareLoader()
     this.hideLoader()
     this.hideError()
 
@@ -79,6 +134,23 @@ class WireFrame {
     }
   }
 
+  prepareLoader() {
+    const displayModifiers = ['flex', 'inline-flex', 'grid', 'inline', 'inline-block', 'table']
+    if (this.loader !== null) {
+      const attributeNames = DomUtils.getAttributeNames(this.loader)
+      const loaderAttr = attributeNames.find(name => name.startsWith('wire:loader'))
+      const modifiers = DomUtils.getModifiers(loaderAttr)
+      if (modifiers.length) {
+        for (let mod of modifiers) {
+          if (displayModifiers.includes(mod)) {
+            this.loaderDisplayType = mod
+            break
+          }
+        }
+      }
+    }
+  }
+
   hideLoader() {
     if (this.loader) {
       this.loader.style.display = 'none'
@@ -87,7 +159,7 @@ class WireFrame {
 
   showLoader() {
     if (this.loader) {
-      this.loader.style.display = 'block'
+      this.loader.style.display = this.loaderDisplayType
     }
   }
 
@@ -230,6 +302,7 @@ class WireManager {
       const element = e.target
       if (element.tagName === 'FORM') {
         if (element.getAttribute('wire:mutate') !== null) {
+          const target = element.getAttribute('wire:target')
           const eventsToFire = element.getAttribute('wire:event')
 
           if (e.preventDefault) {
@@ -241,7 +314,18 @@ class WireManager {
           const data = new FormData(element)
 
           this.performMutation(url, data, method, () => {
-            if (eventsToFire !== null) {
+            // Either the specified target is refreshed or
+            // the list of events are fired
+            if (target !== null) {
+              const source = element.getAttribute('wire:source')
+              if (source === null) {
+                throw Error(`Trigger is missing the 'wire:source' attribute`)
+              } else {
+                if (target in self.frames) {
+                  self.frames[target].updateSource(source)
+                }
+              }
+            } else if (eventsToFire !== null) {
               const events = eventsToFire.split(',')
               self.fireEvents(events)
             }

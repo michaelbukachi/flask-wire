@@ -4,9 +4,17 @@
   "main": "index.js",
   "author": "Michael Bukachi",
   "license": "MIT",
+  "scripts": {
+    "build": "./node_modules/.bin/browserify js/index.js -p esmify -p tinyify -o flask_wire/static/js/bundle.js",
+    "test": "jest js"
+  },
   "devDependencies": {
+    "@babel/core": "^7.12.13",
+    "@babel/preset-env": "^7.12.13",
+    "babel-jest": "^26.6.3",
     "browserify": "^17.0.0",
     "esmify": "^2.1.1",
+    "jest": "^26.6.3",
     "tinyify": "^3.0.0"
   },
   "dependencies": {
