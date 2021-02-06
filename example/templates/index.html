@@ -10,10 +10,10 @@
 {{ wire_frame(id='test', initial=url_for('header')) }}
 {{ wire_frame(id='test2', initial=url_for('sub_header')) }}
 {{ wire_frame(id='test3', initial=url_for('sub_sub_header')) }}
-{{ wire_frame(id='messages_list', initial=url_for('messages_list'), on_events=['message-added']) }}
+{{ wire_frame(id='messages_list', initial=url_for('messages_list')) }}
 {{ wire_trigger(target='test', source=url_for('another_header'), text='Change header') }}
 <div style="margin-top: 20px">
-  <form method="post" action="{{ url_for('add_message') }}" {{ wire_mutation(events=['message-added']) }}>
+  <form method="post" action="{{ url_for('add_message') }}" {{ wire_mutation(target='messages_list') }}>
     <input name="message" placeholder="Message">
     <button type="submit">Add message</button>
   </form>

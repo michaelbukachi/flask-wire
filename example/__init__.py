@@ -61,7 +61,7 @@ def create_app():
         message = request.form['message']
         db.session.add(Message(content=message))
         db.session.commit()
-        return redirect(url_for('.index'))
+        return redirect(url_for('.messages_list'))
 
     return app
 

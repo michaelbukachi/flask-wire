@@ -1,56 +1,15 @@
 import 'whatwg-fetch'
 import {fetch} from "whatwg-fetch";
+import {DomUtils} from "./dom";
+import {BrowserUtils} from "./browser";
 
-export class DomUtils {
-
-  static selectElementsWithAttribute(doc, attr) {
-    const regex = new RegExp(attr)
-    const elements = []
-    const children = doc.children
-    for (let i = 0; i < children.length; i++) {
-      const child = children[i]
-      if (child.hasAttributes()) {
-        for (let j = 0; j < child.attributes.length; j++) {
-          if (regex.test(child.attributes[j].name)) {
-            elements.push(child)
-            break
-          }
-        }
-      }
-    }
-    return elements
-  }
-
-  static selectFirstElementWithAttribute(doc, attr) {
-    const elements = DomUtils.selectElementsWithAttribute(doc, attr)
-    return elements.length ? elements[0] : null
-  }
-
-  static stringToElement(string) {
-    const template = document.createElement('template')
-    template.innerHTML = string.trim()
-    return template.content.firstChild
-  }
-
-  static getAttributeNames(element) {
-    if (!element.hasAttributes()) {
-      return []
-    }
-    const attributeNames = []
-    for (let i = 0; i < element.attributes.length; i++) {
-      const attr = element.attributes[i]
-      attributeNames.push(attr.name)
-    }
-    return attributeNames
-  }
-
-  static getModifiers(attr) {
-    const tokens = attr.split('.')
-    if (tokens.length === 1) {
-      return []
-    } else {
-      return tokens.slice(1)
-    }
+function checkStatus(response) {
+  if (response.status >= 200 && response.status < 400) {
+    return response
+  } else {
+    const error = new Error(response.statusText)
+    error.response = response
+    throw error
   }
 }
 
@@ -103,13 +62,16 @@ class WireFrame {
     this.showLoader()
 
     fetch(source)
-      .then(this.checkStatus)
+      .then(checkStatus)
       .then((response) => {
         return response.text()
       })
       .then((body) => {
         this.updateBody(body)
         this.source = source
+
+        this.showBody()
+        this.hideError()
 
         if (onDone !== null) {
           const element = this.stringToElement(body)
@@ -122,16 +84,6 @@ class WireFrame {
       }).finally(() => {
       this.hideLoader()
     })
-  }
-
-  checkStatus(response) {
-    if (response.status >= 200 && response.status < 400) {
-      return response
-    } else {
-      const error = new Error(response.statusText)
-      error.response = response
-      throw error
-    }
   }
 
   prepareLoader() {
@@ -172,6 +124,19 @@ class WireFrame {
   showError() {
     if (this.errorBody) {
       this.errorBody.style.display = 'block'
+      this.hideBody()
+    }
+  }
+
+  showBody() {
+    if (this.body) {
+      this.body.style.display = 'block'
+    }
+  }
+
+  hideBody() {
+    if (this.body) {
+      this.body.style.display = 'none'
     }
   }
 
@@ -276,14 +241,22 @@ class WireManager {
     const clickHandler = (e) => {
       const element = e.target
       if (element.tagName === 'A') {
-        const source = element.getAttribute('wire:source')
+        let sourceAttribute = DomUtils.getAttribute(element, 'wire:source.*')
         const target = element.getAttribute('wire:target')
 
-        if (source === null) {
+        if (sourceAttribute === null) {
           throw Error(`Trigger is missing the 'wire:source' attribute`)
         } else {
           if (target in self.frames) {
+            let source = element.getAttribute(sourceAttribute.name)
+            const sourceParams = BrowserUtils.getParamsFromUrl(source)
+            source = BrowserUtils.addBrowserParamsToUrl(source)
             self.frames[target].updateSource(source)
+
+            if (sourceAttribute.name === 'wire:source.persist') {
+              const url = BrowserUtils.addParamsToUrl(location.pathname, sourceParams)
+              BrowserUtils.updateBrowserUrl(new URL(url))
+            }
           }
         }
       }
@@ -313,21 +286,18 @@ class WireManager {
           const method = element.getAttribute('method') || 'POST'
           const data = new FormData(element)
 
-          this.performMutation(url, data, method, () => {
+          this.submitForm(url, data, method, (body) => {
             // Either the specified target is refreshed or
             // the list of events are fired
             if (target !== null) {
-              const source = element.getAttribute('wire:source')
-              if (source === null) {
-                throw Error(`Trigger is missing the 'wire:source' attribute`)
-              } else {
-                if (target in self.frames) {
-                  self.frames[target].updateSource(source)
-                }
-              }
+              self.frames[target].updateBody(body)
             } else if (eventsToFire !== null) {
               const events = eventsToFire.split(',')
               self.fireEvents(events)
+            }
+          }, () => {
+            if (target !== null) {
+              self.frames[target].showError()
             }
           })
 
@@ -344,17 +314,48 @@ class WireManager {
     }
   }
 
-  performMutation(url, data, method, eventsHandler = null) {
-    fetch(url, {
-      method: method,
-      body: data
-    }).then(function (response) {
-      if (eventsHandler !== null) {
-        eventsHandler()
-      }
-    }).catch(function (e) {
-      console.log(e)
-    })
+  submitForm(url, data, method, successHandler = null, errorHandler = null) {
+    if (method.toUpperCase() === 'GET') {
+      const queryString = BrowserUtils.objToUrlParamString(data)
+      fetch(`${url}?${queryString}`, {
+        method: method,
+      })
+        .then(checkStatus)
+        .then(function (response) {
+          return response.text()
+        })
+        .then(function (body) {
+          if (successHandler !== null) {
+            successHandler(body)
+          }
+        })
+        .catch(function (e) {
+          console.log(e)
+          if (errorHandler !== null) {
+            errorHandler()
+          }
+        })
+    } else {
+      fetch(url, {
+        method: method,
+        body: data
+      })
+        .then(checkStatus)
+        .then(function (response) {
+          return response.text()
+        })
+        .then(function (body) {
+          if (successHandler !== null) {
+            successHandler(body)
+          }
+        })
+        .catch(function (e) {
+          console.log(e)
+          if (errorHandler !== null) {
+            errorHandler()
+          }
+        })
+    }
   }
 
   doCleanup() {

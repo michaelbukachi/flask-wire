@@ -1,4 +1,4 @@
-const {DomUtils} = require("../index");
+const {DomUtils} = require("../dom");
 
 test('DomUtils selectElementsWithAttribute - no regex', () => {
   const element = DomUtils.stringToElement('<div class="parent"><div wire:loader></div></div>')

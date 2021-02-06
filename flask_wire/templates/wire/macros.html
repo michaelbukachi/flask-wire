@@ -17,6 +17,6 @@ loader_text='Loading data', frame_classes=None, error_classes=None, loader_class
      class="{% if extra_classes %}{{ extra_classes }}{% endif %}">{{ text }}</a>
 {% endmacro %}
 
-{% macro wire_mutation(target=None, source=None, events=None) %}
-  wire:mutate {% if target %}wire:target="{{ target }}" {% if source %}wire:source="{{ source }}"{% endif %}{% elif events %}wire:event="{{ events|join(',') }}"{% endif %}
+{% macro wire_mutation(target=None, events=None) %}
+  wire:mutate {% if target %}wire:target="{{ target }}"{% elif events %}wire:event="{{ events|join(',') }}"{% endif %}
 {% endmacro %}
