@@ -187,7 +187,7 @@ class WireTrigger {
         // Persist URL to browser
         const sourceParams = BrowserUtils.getParamsFromUrl(source)
         const url = BrowserUtils.addParamsToUrl(location.pathname, sourceParams)
-        BrowserUtils.updateBrowserUrl(new URL(url))
+        BrowserUtils.updateBrowserUrl(new URL(url, `${location.protocol}//${location.host}`))
       }
     }
   }
