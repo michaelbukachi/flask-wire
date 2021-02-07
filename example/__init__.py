@@ -53,7 +53,11 @@ def create_app():
 
     @app.route('/messages')
     def messages_list():
-        messages = Message.query.all()
+        search = request.args.get('search')
+        if search:
+            messages = Message.query.filter(Message.content.ilike(f'%{search}%')).all()
+        else:
+            messages = Message.query.all()
         return render_template('messages.html', messages=messages)
 
     @app.route('/add_message', methods=('GET', 'POST'))

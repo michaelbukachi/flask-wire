@@ -1,6 +1,8 @@
 from flask import Blueprint, url_for, request
 from markupsafe import Markup
 
+from flask_wire.utils import url_for_sync
+
 
 class Wire:
 
@@ -19,8 +21,13 @@ class Wire:
 
         app.jinja_env.globals['wire'] = self
 
+        @app.context_processor
+        def inject_helpers():
+            return dict(url_for_sync=url_for_sync)
+
         @app.after_request
         def modify_headers(response):
+            # Required to keep track of URls on the frontend
             response.headers.add('X-Request-URL', request.url)
             return response
 

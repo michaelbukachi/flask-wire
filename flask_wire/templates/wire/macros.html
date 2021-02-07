@@ -12,8 +12,8 @@ loader_text='Loading data', frame_classes=None, error_classes=None, loader_class
   </div>
 {% endmacro %}
 
-{% macro wire_trigger(target, source, text, extra_classes=None) %}
-  <a href="javascript:" wire:target="{{ target }}" wire:source="{{ source }}"
+{% macro wire_trigger(target, source, text, persist=False, extra_classes=None) %}
+  <a href="javascript:" wire:target="{{ target }}" wire:source{% if persist %}.persist{% endif %}="{{ source }}"
      class="{% if extra_classes %}{{ extra_classes }}{% endif %}">{{ text }}</a>
 {% endmacro %}
 

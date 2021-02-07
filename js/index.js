@@ -170,6 +170,101 @@ class WireEvent {
   }
 }
 
+class WireTrigger {
+  constructor(target, source, persist = false) {
+    this.target = target
+    this.source = source
+    this.persist = persist
+  }
+
+  fire() {
+    if (this.target) {
+      let source = this.source
+
+      this.target.updateSource(source)
+
+      if (this.persist) {
+        // Persist URL to browser
+        const sourceParams = BrowserUtils.getParamsFromUrl(source)
+        const url = BrowserUtils.addParamsToUrl(location.pathname, sourceParams)
+        BrowserUtils.updateBrowserUrl(new URL(url))
+      }
+    }
+  }
+}
+
+class WireMutation {
+  constructor(url, method, data, target = null, eventsToFire = null, eventsHandler = null) {
+    this.url = url
+    this.method = method
+    this.data = data
+    this.target = target
+    this.eventsToFire = eventsToFire
+    this.eventsHandler = eventsHandler
+  }
+
+  mutate() {
+    this.submitForm(this.url, this.data, this.method, (body) => {
+      // Either the specified target is refreshed or
+      // the list of events are fired
+      if (this.target) {
+        this.target.updateBody(body)
+      } else if (this.eventsToFire && this.eventsHandler) {
+        const events = this.eventsToFire.split(',')
+        this.eventsHandler(events)
+      }
+    }, () => {
+      if (this.target) {
+        this.target.showError()
+      }
+    })
+  }
+
+  submitForm(url, data, method, successHandler = null, errorHandler = null) {
+    if (method.toUpperCase() === 'GET') {
+      const queryString = new URLSearchParams(data).toString()
+      fetch(`${url}?${queryString}`, {
+        method: method,
+      })
+        .then(checkStatus)
+        .then(function (response) {
+          return response.text()
+        })
+        .then(function (body) {
+          if (successHandler !== null) {
+            successHandler(body)
+          }
+        })
+        .catch(function (e) {
+          console.log(e)
+          if (errorHandler !== null) {
+            errorHandler()
+          }
+        })
+    } else {
+      fetch(url, {
+        method: method,
+        body: data
+      })
+        .then(checkStatus)
+        .then(function (response) {
+          return response.text()
+        })
+        .then(function (body) {
+          if (successHandler !== null) {
+            successHandler(body)
+          }
+        })
+        .catch(function (e) {
+          console.log(e)
+          if (errorHandler !== null) {
+            errorHandler()
+          }
+        })
+    }
+  }
+}
+
 class WireManager {
   constructor() {
     this.frames = {}
@@ -242,22 +337,19 @@ class WireManager {
       const element = e.target
       if (element.tagName === 'A') {
         let sourceAttribute = DomUtils.getAttribute(element, 'wire:source.*')
-        const target = element.getAttribute('wire:target')
 
         if (sourceAttribute === null) {
           throw Error(`Trigger is missing the 'wire:source' attribute`)
         } else {
-          if (target in self.frames) {
-            let source = element.getAttribute(sourceAttribute.name)
-            const sourceParams = BrowserUtils.getParamsFromUrl(source)
-            source = BrowserUtils.addBrowserParamsToUrl(source)
-            self.frames[target].updateSource(source)
+          const target = element.getAttribute('wire:target')
 
-            if (sourceAttribute.name === 'wire:source.persist') {
-              const url = BrowserUtils.addParamsToUrl(location.pathname, sourceParams)
-              BrowserUtils.updateBrowserUrl(new URL(url))
-            }
-          }
+          let source = element.getAttribute(sourceAttribute.name)
+          const trigger = new WireTrigger(
+            self.frames[target],
+            source,
+            sourceAttribute.name === 'wire:source.persist',
+          )
+          trigger.fire()
         }
       }
     }
@@ -286,20 +378,15 @@ class WireManager {
           const method = element.getAttribute('method') || 'POST'
           const data = new FormData(element)
 
-          this.submitForm(url, data, method, (body) => {
-            // Either the specified target is refreshed or
-            // the list of events are fired
-            if (target !== null) {
-              self.frames[target].updateBody(body)
-            } else if (eventsToFire !== null) {
-              const events = eventsToFire.split(',')
-              self.fireEvents(events)
-            }
-          }, () => {
-            if (target !== null) {
-              self.frames[target].showError()
-            }
-          })
+          const mutation = new WireMutation(
+            url,
+            method,
+            data,
+            self.frames[target],
+            eventsToFire,
+            self.fireEvents
+          )
+          mutation.mutate()
 
           return false
 
@@ -311,50 +398,6 @@ class WireManager {
       document.addEventListener('submit', submitHandler)
     } else if (document.attachEvent) {
       document.attachEvent('submit', submitHandler)
-    }
-  }
-
-  submitForm(url, data, method, successHandler = null, errorHandler = null) {
-    if (method.toUpperCase() === 'GET') {
-      const queryString = BrowserUtils.objToUrlParamString(data)
-      fetch(`${url}?${queryString}`, {
-        method: method,
-      })
-        .then(checkStatus)
-        .then(function (response) {
-          return response.text()
-        })
-        .then(function (body) {
-          if (successHandler !== null) {
-            successHandler(body)
-          }
-        })
-        .catch(function (e) {
-          console.log(e)
-          if (errorHandler !== null) {
-            errorHandler()
-          }
-        })
-    } else {
-      fetch(url, {
-        method: method,
-        body: data
-      })
-        .then(checkStatus)
-        .then(function (response) {
-          return response.text()
-        })
-        .then(function (body) {
-          if (successHandler !== null) {
-            successHandler(body)
-          }
-        })
-        .catch(function (e) {
-          console.log(e)
-          if (errorHandler !== null) {
-            errorHandler()
-          }
-        })
     }
   }
 
