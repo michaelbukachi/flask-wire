@@ -204,11 +204,15 @@ class WireMutation {
   }
 
   mutate() {
+    if (this.target) {
+      this.target.showLoader()
+    }
     this.submitForm(this.url, this.data, this.method, (body) => {
       // Either the specified target is refreshed or
       // the list of events are fired
       if (this.target) {
         this.target.updateBody(body)
+        this.target.hideLoader()
       } else if (this.eventsToFire && this.eventsHandler) {
         const events = this.eventsToFire.split(',')
         this.eventsHandler(events)
@@ -335,14 +339,13 @@ class WireManager {
     const self = this
     const clickHandler = (e) => {
       const element = e.target
-      if (element.tagName === 'A') {
+      const target = element.getAttribute('wire:target')
+      if (element.tagName === 'A' && target !== null) {
         let sourceAttribute = DomUtils.getAttribute(element, 'wire:source.*')
 
         if (sourceAttribute === null) {
           throw Error(`Trigger is missing the 'wire:source' attribute`)
         } else {
-          const target = element.getAttribute('wire:target')
-
           let source = element.getAttribute(sourceAttribute.name)
           const trigger = new WireTrigger(
             self.frames[target],
