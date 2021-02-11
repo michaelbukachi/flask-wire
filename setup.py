@@ -11,7 +11,7 @@ except:
 
 import codecs
 
-version = '1.0.0a10'
+version = '1.0.0a11'
 
 setup(
     name='Flask-Wire',
