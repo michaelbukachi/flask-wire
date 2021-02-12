@@ -119,7 +119,29 @@ respectively.
 
 wire_trigger
 ^^^^^^^^^^^^
-**TODO**
+The ``wire_trigger`` is basically an ``<a></a>`` tag that changes the source of a frame without reloading the page.
+
+
+Usage
+
+.. code-block:: jinja
+
+    {% from "wire/macros.html" import wire_trigger %}
+    {{ wire_trigger(target, source, text, persist, extra_classes) }}
+
+**Required**: ``target``, ``source``, ``text``
+
+``target`` - This is the id of the frame to change. A frame with that **id** must exists in the DOM.
+
+``source`` - This is a url where the target frame will fetch its data from. **Note** Once a frame's source of data is
+changed, it becomes the new default source for the frame.
+
+``text`` - This is the inner text of the ``<a>`` tag
+
+When the **persist** is set to ``True``, the url passed into **source** is pushed into the browser history. It's **False**
+by default since most times you won't need to update the browser history with the url of a small section of a page.
+
+``extra_classes`` are for styling the ``<a>`` tag.
 
 wire_mutation
 ^^^^^^^^^^^^^
