@@ -2,6 +2,15 @@
 Flask-Wire
 ===========
 
+.. image:: https://img.shields.io/pypi/v/Flask-Wire.svg
+    :target: https://pypi.python.org/pypi/Flask-Wire/
+.. image:: https://img.shields.io/pypi/l/Flask-Wire.svg
+    :target: https://pypi.python.org/pypi/Flask-Wire
+.. image:: https://img.shields.io/pypi/pyversions/Flask-Wire.svg
+    :target: https://pypi.python.org/pypi/Flask-Wire/
+.. image:: https://img.shields.io/pypi/status/Flask-Wire.svg
+    :target: https://pypi.python.org/pypi/Flask-Wire/
+
 Flask-Wire is a Flask extension that brings "HTML over the wire" capabilities to Flask. It is heavily inspired by
 Laravel's `Livewire <https://laravel-livewire.com/>`_ and Ruby on Rails' `Hotwire <https://hotwire.dev/>`_
 
@@ -172,3 +181,22 @@ the target will be updated but the events won't be fired.
 Behind the scenes
 =================
 I would be lying if I said all this was achieved without a bit Javascript. Javascript was involved though just **a bit**.
+
+Behind all the magic lies Javascript pulling all the strings. It is actually possible to bundle the javascript part of
+the extension and create an abstraction around it in any language or framework.
+
+The Javascript bundle is responsible for intercepting events i.e clicks on ``<a>`` tags and submissions in ``forms`` and
+preventing there default execution which would cause the page to load. It is also responsible for fetch the HTML from the
+source URLs and setting it on the target frames.
+
+One interesting thing to note is that every time HTML is transmitted over the wire, any new frame in the HTML is identified.
+This makes it possible to do very interesting things with minimal effort. For instance, take a look at this scenario:
+
+- You have a page which has a table of users
+- Somewhere in that page, you have a button which takes you to a page for creating a new user.
+- When a user is created, usually you want to go the view the lists all the users.
+
+With ``Flask-Wire``, you can achieve all this without loading the page besides the first time. You basically get that speed
+SPAs offer at the comfort of your favourite programming language (which is Python :) ).
+
+Feel free to checkout the **examples** folder for different usecases.
