@@ -117,9 +117,13 @@ when fetching data respectively. If you don't want the frame to display them, ju
 ``frame_classes``, ``error_classes``, ``loader_classes`` are for styling the body, the error body and the loader of the frame,
 respectively.
 
-``wire_trigger`` - **TODO**
+wire_trigger
+^^^^^^^^^^^^
+**TODO**
 
-``wire_mutation`` - **TODO**
+wire_mutation
+^^^^^^^^^^^^^
+**TODO**
 
 =================
 Behind the scenes
