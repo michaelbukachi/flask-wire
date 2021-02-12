@@ -83,7 +83,9 @@ We didn't have touch a single line of **Javascript** to achieve it :)
 ================
 Available macros
 ================
-``wire_frame`` - This macro is responsible for creating the container that will display the HTML delivered over the wire.
+wire_frame
+^^^^^^^^^^
+This macro is responsible for creating the container that will display the HTML delivered over the wire.
 
 Usage
 
@@ -97,9 +99,23 @@ Besides **id**, all other parameters optional.
 If a url is passed to the **initial** parameter, as soon as a page is loader, the frame will fetch data from the url
 passed and set it to its body.
 
+The **on_events** takes a list of strings (events). It allows the frame to listen for events and update its body from
+the url it last fetched from e.g:
+
+.. code-block:: jinja
+
+    {% from "wire/macros.html" import wire_frame %}
+    {{ wire_frame('test', initial='/someurl', on_events=['data_added']) }}
+
+If a trigger does not change the source of the frame, every time **data_added** is fired, the frame will fetch data
+from initial source i.e ``/someurl``
+
 By default, all frames have an error container and a loader container which are displayed if an error occurs or
 when fetching data respectively. If you don't want the frame to display them, just pass ``None`` or an empty text to the
 **error_text** or **loader_text** parameters.
+
+``frame_classes``, ``error_classes``, ``loader_classes`` are for styling the body, the error body and the loader of the frame,
+respectively.
 
 ``wire_trigger`` - **TODO**
 
