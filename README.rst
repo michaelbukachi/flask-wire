@@ -145,7 +145,28 @@ by default since most times you won't need to update the browser history with th
 
 wire_mutation
 ^^^^^^^^^^^^^
-**TODO**
+Unlike the **wire_frame** and **wire_trigger** macros, the wire_mutation macro does not generate a HTML tag. It
+basically adds attributes to an existing tag, a ``<form>`` to be specific.
+
+Usage
+
+.. code-block:: jinja
+
+    {% from "wire/macros.html" import wire_mutation %}
+    <form method="post" action="" {{ wire_mutation(target, events) }}>
+        ...
+    </form>
+
+All the parameters of the **wire_mutation** are optional. However, it is recommended to have at least one present,
+otherwise the macro offers no functionality.
+
+``target`` - This is the id of thw frame to change i.e When the form is submitted, the body of the target frame is updated
+with the response returned from the submission.
+``events`` - This is a list of events to fire after a successful submission. This parameter takes a list of strings.
+
+**Note** The ``target`` parameter takes precedence over the ``events`` parameter. If both happen to be provided,
+the target will be updated but the events won't be fired.
+
 
 =================
 Behind the scenes
