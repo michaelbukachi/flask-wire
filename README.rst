@@ -82,16 +82,18 @@ Now let's write a simple Flask app to demonstrate the extension in action.
         app.run(debug=True)
 
 
-Running the above program produces this:
+Running the above program i.e ``python app.py`` produces this:
 
 .. image:: demo.gif
     :width:  600
 
-We didn't have touch a single line of **Javascript** to achieve it :)
+We didn't have to touch a single line of **Javascript** to achieve it :)
 
 ================
 Available macros
 ================
+If you are not familiar with what a **macro** is, check `here <https://jinja.palletsprojects.com/en/2.11.x/templates/#macros>`_
+
 wire_frame
 ^^^^^^^^^^
 This macro is responsible for creating the container that will display the HTML delivered over the wire.
@@ -175,6 +177,14 @@ with the response returned from the submission.
 
 **Note** The ``target`` parameter takes precedence over the ``events`` parameter. If both happen to be provided,
 the target will be updated but the events won't be fired.
+
+
+=======
+Testing
+=======
+With `Flask-Wire`, you don't have to worry about testing you interactive views. Since all the html is being processed in
+Flask, you can just test your sources directly without worrying about how "x" will react to "y". Also, the extension is
+heavily tested, so you don't have to think about the glue that brings everything together :)
 
 
 =================
