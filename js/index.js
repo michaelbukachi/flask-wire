@@ -3,7 +3,7 @@ import {fetch} from "whatwg-fetch";
 import {DomUtils} from "./dom";
 import {BrowserUtils} from "./browser";
 
-function checkStatus(response) {
+export function checkStatus(response) {
   if (response.status >= 200 && response.status < 400) {
     return response
   } else {
