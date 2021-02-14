@@ -105,9 +105,9 @@ Usage
     {% from "wire/macros.html" import wire_frame %}
     {{ wire_frame(id, initial, on_events, error_text, loader_text, frame_classes, error_classes, loader_classes) }}
 
-Besides **id**, all other parameters optional.
+Besides **id**, all other parameters are optional.
 
-If a url is passed to the **initial** parameter, as soon as a page is loader, the frame will fetch data from the url
+If a url is passed to the **initial** parameter, as soon as a page is loaded, the frame will fetch data from the url
 passed and set it to its body.
 
 The **on_events** takes a list of strings (events). It allows the frame to listen for events and update its body from
@@ -190,7 +190,7 @@ heavily tested, so you don't have to think about the glue that brings everything
 =================
 Behind the scenes
 =================
-I would be lying if I said all this was achieved without a bit Javascript. Javascript was involved though just **a bit**.
+I would be lying if I said all this was achieved without a bit Javascript. Javascript was involved, though just **a bit**.
 
 Behind all the magic lies Javascript pulling all the strings. It is actually possible to bundle the javascript part of
 the extension and create an abstraction around it in any language or framework.
