@@ -12,7 +12,8 @@ Flask-Wire
     :target: https://pypi.python.org/pypi/Flask-Wire/
 
 Flask-Wire is a Flask extension that brings "HTML over the wire" capabilities to Flask. It is heavily inspired by
-Laravel's `Livewire <https://laravel-livewire.com/>`_ and Ruby on Rails' `Hotwire <https://hotwire.dev/>`_
+Laravel's `Livewire <https://laravel-livewire.com/>`_ and Ruby on Rails' `Hotwire <https://hotwire.dev/>`_ and last but
+not the least `Flask-Meld <https://www.flask-meld.dev/>`_.
 
 If you haven't heard of "HTML over the wire" before, take a look at `this article <https://m.signalvnoise.com/html-over-the-wire/>`_
 to bring you up to speed.
