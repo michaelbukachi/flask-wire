@@ -26,5 +26,15 @@
   </form>
 </div>
 {{ wire_frame(id='test4', initial='/someurl') }}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('wire:frame_load', function () {
+      console.log('Global event received')
+    }, true)
+    document.addEventListener('wire:frame_load messages_list', function () {
+      console.log('Local event received for messages_list frame')
+    })
+  })
+</script>
 </body>
 </html>

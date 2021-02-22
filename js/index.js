@@ -2,6 +2,7 @@ import 'whatwg-fetch'
 import {fetch} from "whatwg-fetch";
 import {DomUtils} from "./dom";
 import {BrowserUtils} from "./browser";
+import {dispatch} from "./utils";
 
 export function checkStatus(response) {
   if (response.status >= 200 && response.status < 400) {
@@ -44,6 +45,10 @@ class WireFrame {
   updateBody(body) {
     if (this.body) {
       this.body.innerHTML = body
+
+      // Fire events signaling completion of data fetch
+      dispatch('wire:frame_load')
+      dispatch(`wire:frame_load ${this.id}`)
     }
   }
 

@@ -179,6 +179,16 @@ with the response returned from the submission.
 **Note** The ``target`` parameter takes precedence over the ``events`` parameter. If both happen to be provided,
 the target will be updated but the events won't be fired.
 
+================
+Events
+================
+Sometimes, you might to need to run some code after some frame has loaded. For instance, you might want to initialized
+some third party JS library on the body of a freshly loaded frame. To handle these situations, there are two events you
+can tap into **wire:frame_load** and **wire:frame_load <frame_id>**.
+
+``wire:frame_load`` - This is fired everytime a frame is loaded.
+
+``wire:frame_loaded`` <frame_id> - This is fired everytime a frame with the id **frame_id** is loaded.
 
 =======
 Testing
