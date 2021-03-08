@@ -104,7 +104,7 @@ Usage
 .. code-block:: jinja
 
     {% from "wire/macros.html" import wire_frame %}
-    {{ wire_frame(id, initial, on_events, error_text, loader_text, frame_classes, error_classes, loader_classes) }}
+    {{ wire_frame(id, initial, on_events, error_text, error_use_html, loader_text, loader_use_html, frame_classes, error_classes, loader_classes) }}
 
 Besides **id**, all other parameters are optional.
 
@@ -124,7 +124,8 @@ from initial source i.e ``/someurl``
 
 By default, all frames have an error container and a loader container which are displayed if an error occurs or
 when fetching data respectively. If you don't want the frame to display them, just pass ``None`` or an empty text to the
-**error_text** or **loader_text** parameters.
+**error_text** or **loader_text** parameters. The **error_user_html** and **loader_use_html** parameters should be set
+`True` if you want to treat your text as HTML.
 
 ``frame_classes``, ``error_classes``, ``loader_classes`` are for styling the body, the error body and the loader of the frame,
 respectively.
