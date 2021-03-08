@@ -1,12 +1,24 @@
-{% macro wire_frame(id, initial=None, on_events=None, error_text='Failed to fetch data',
-loader_text='Loading data', frame_classes=None, error_classes=None, loader_classes=None) %}
+{% macro wire_frame(id, initial=None, on_events=None, error_text='Failed to fetch data', error_use_html=False,
+loader_text='Loading data', loader_use_html=False, frame_classes=None, error_classes=None, loader_classes=None) %}
   <div wire:frame="{{ id }}" {% if initial %}wire:init="{{ initial }}"{% endif %}
        {% if on_events %}wire:on-event="{{ on_events|join(',') }}"{% endif %}>
     <div wire:loader class="{% if loader_classes %}{{ loader_classes }}{% endif %}" style="display: none">
-      {% if loader_text %}{{ loader_text }}{% endif %}
+      {% if loader_text %}
+        {% if loader_use_html %}
+          {{ loader_text|safe }}
+        {% else %}
+          {{ loader_text }}
+        {% endif %}
+      {% endif %}
     </div>
     <div wire:error-body class="{% if error_classes %}{{ error_classes }}{% endif %}" style="display: none">
-      {% if error_text %}{{ error_text }}{% endif %}
+      {% if error_text %}
+        {% if error_use_html %}
+          {{ error_text|safe }}
+        {% else %}
+          {{ error_text }}
+        {% endif %}
+      {% endif %}
     </div>
     <div wire:body class="{% if frame_classes %}{{ frame_classes }}{% endif %}"></div>
   </div>

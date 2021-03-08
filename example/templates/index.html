@@ -26,6 +26,7 @@
   </form>
 </div>
 {{ wire_frame(id='test4', initial='/someurl') }}
+{{ wire_frame(id='test5', initial='/someurl', error_text='<strong>Error!!!</strong>', error_use_html=True) }}
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('wire:frame_load', function () {

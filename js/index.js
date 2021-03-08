@@ -106,38 +106,38 @@ class WireFrame {
 
   hideLoader() {
     if (this.loader) {
-      this.loader.style.display = 'none'
+      DomUtils.selectFirstElementWithAttribute(document.querySelector(`div[wire\\:frame='${this.id}']`), 'wire:loader.*').style.display = 'none'
     }
   }
 
   showLoader() {
     if (this.loader) {
-      this.loader.style.display = this.loaderDisplayType
+      DomUtils.selectFirstElementWithAttribute(document.querySelector(`div[wire\\:frame='${this.id}']`), 'wire:loader.*').style.display = this.loaderDisplayType
     }
   }
 
   hideError() {
     if (this.errorBody) {
-      this.errorBody.style.display = 'none'
+      document.querySelector(`div[wire\\:frame='${this.id}'] > div[wire\\:error-body='']`).style.display = 'none'
     }
   }
 
   showError() {
     if (this.errorBody) {
-      this.errorBody.style.display = 'block'
+      document.querySelector(`div[wire\\:frame='${this.id}'] > div[wire\\:error-body='']`).style.display = 'block'
       this.hideBody()
     }
   }
 
   showBody() {
     if (this.body) {
-      this.body.style.display = 'block'
+      document.querySelector(`div[wire\\:frame='${this.id}'] > div[wire\\:body='']`).style.display = 'block'
     }
   }
 
   hideBody() {
     if (this.body) {
-      this.body.style.display = 'none'
+      document.querySelector(`div[wire\\:frame='${this.id}'] > div[wire\\:body='']`).style.display = 'none'
     }
   }
 
