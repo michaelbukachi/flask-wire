@@ -60,6 +60,11 @@ def create_app():
             messages = Message.query.all()
         return render_template('messages.html', messages=messages)
 
+    @app.route('/messages_count')
+    def messages_count():
+        count = Message.query.count()
+        return render_template('messages_count.html', count=count)
+
     @app.route('/add_message', methods=('GET', 'POST'))
     def add_message():
         message = request.form['message']

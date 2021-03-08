@@ -30,7 +30,6 @@ class WireFrame {
 
   init(element) {
     if (element.children.length) {
-      this.body = DomUtils.selectFirstElementWithAttribute(element, 'wire:body')
       this.errorBody = DomUtils.selectFirstElementWithAttribute(element, 'wire:error-body')
       this.loader = DomUtils.selectFirstElementWithAttribute(element, 'wire:loader.*')
     }
@@ -43,13 +42,10 @@ class WireFrame {
   }
 
   updateBody(body) {
-    if (this.body) {
-      this.body.innerHTML = body
-
-      // Fire events signaling completion of data fetch
-      dispatch('wire:frame_load')
-      dispatch(`wire:frame_load ${this.id}`)
-    }
+    document.querySelector(`div[wire\\:frame='${this.id}'] > div[wire\\:body='']`).innerHTML = body
+    // Fire events signaling completion of data fetch
+    dispatch('wire:frame_load')
+    dispatch(`wire:frame_load ${this.id}`)
   }
 
   updateSource(source, onSourceDataFetched = null) {
@@ -62,7 +58,7 @@ class WireFrame {
     return template.content.firstChild
   }
 
-  fetchDataFromSource(source, target, onDone = null) {
+  fetchDataFromSource(source, onDone = null) {
     this.hideError()
     this.showLoader()
 
