@@ -290,7 +290,7 @@ class WireManager {
     this.events[eventName].addListener(listener)
   }
 
-  fireEvents(events) {
+  fireEvents = (events) => {
     for (let event of events) {
       if (event in this.events) {
         this.events[event].fire()

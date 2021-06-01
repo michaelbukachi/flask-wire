@@ -6,3 +6,5 @@ wire.db
 build
 dist
 .eggs
+debug.html
+debug.py
